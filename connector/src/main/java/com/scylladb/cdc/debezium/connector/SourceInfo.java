@@ -1,10 +1,8 @@
 package com.scylladb.cdc.debezium.connector;
 
 import com.datastax.driver.core.utils.Bytes;
-import com.datastax.driver.core.utils.UUIDs;
 import com.scylladb.cdc.model.TableName;
 import com.scylladb.cdc.model.TaskId;
-import com.scylladb.cdc.model.worker.ChangeId;
 import com.scylladb.cdc.model.worker.TaskState;
 import io.debezium.connector.common.BaseSourceInfo;
 import io.debezium.util.Collect;

@@ -2,8 +2,6 @@ package com.scylladb.cdc.debezium.connector;
 
 import com.scylladb.cdc.cql.driver3.Driver3Session;
 import com.scylladb.cdc.cql.driver3.Driver3WorkerCQL;
-import com.scylladb.cdc.model.ExponentialRetryBackoffWithJitter;
-import com.scylladb.cdc.model.RetryBackoff;
 import com.scylladb.cdc.model.worker.WorkerConfiguration;
 import com.scylladb.cdc.model.worker.Worker;
 import io.debezium.pipeline.EventDispatcher;
@@ -11,11 +9,7 @@ import io.debezium.pipeline.source.spi.StreamingChangeEventSource;
 import io.debezium.util.Clock;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.sql.Driver;
 import java.time.Duration;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 

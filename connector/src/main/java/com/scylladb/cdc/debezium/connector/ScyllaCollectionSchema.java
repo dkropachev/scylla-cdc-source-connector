@@ -1,11 +1,9 @@
 package com.scylladb.cdc.debezium.connector;
 
 import io.debezium.data.Envelope;
-import io.debezium.schema.DataCollectionId;
 import io.debezium.schema.DataCollectionSchema;
 import org.apache.kafka.connect.data.Schema;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class ScyllaCollectionSchema implements DataCollectionSchema {

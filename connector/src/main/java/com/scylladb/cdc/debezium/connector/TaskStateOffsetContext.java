@@ -1,6 +1,5 @@
 package com.scylladb.cdc.debezium.connector;
 
-import com.scylladb.cdc.model.TaskId;
 import com.scylladb.cdc.model.worker.TaskState;
 import io.debezium.pipeline.spi.OffsetContext;
 import io.debezium.pipeline.txmetadata.TransactionContext;
