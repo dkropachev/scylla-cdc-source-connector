@@ -39,7 +39,7 @@ public class ScyllaConnectorConfig extends CommonConnectorConfig {
             .withType(ConfigDef.Type.LIST)
             .withWidth(ConfigDef.Width.LONG)
             .withImportance(ConfigDef.Importance.HIGH)
-            .withValidation(ConfigSerializerUtil::validateClusterIpAddresses)
+            .withValidation(Field::isRequired,ConfigSerializerUtil::validateClusterIpAddresses)
             .withDescription("List of IP addresses of nodes in the Scylla cluster that the connector " +
                     "will use to open initial connections to the cluster. " +
                     "In the form of a comma-separated list of pairs <IP>:<PORT>");

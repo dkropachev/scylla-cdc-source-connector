@@ -1,13 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.scylladb</groupId>
     <artifactId>scylla-cdc-source-connector</artifactId>
     <version>1.2.3-SNAPSHOT</version>
     <name>Scylla CDC Source Connector</name>
     <description>Kafka Connect Source Connector from Scylla CDC.</description>
     <url>https://github.com/scylladb/scylla-cdc-source-connector</url>
     <inceptionYear>2020</inceptionYear>
-
+    <packaging>jar</packaging>
+    <parent>
+        <groupId>com.scylladb</groupId>
+        <artifactId>scylla-cdc-source-connector-parent</artifactId>
+        <version>1.2.3-SNAPSHOT</version>
+    </parent>
     <build>
         <plugins>
             <plugin>
@@ -107,7 +111,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
         <!-- highest compatible with java 8 -->
-        <debezium.version>1.4.1.Final</debezium.version>
+        <debezium.version>2.6.2.Final</debezium.version>
         <!-- Docs claim java 8 supported, but support is deprecated -->
         <kafka.version>3.3.1</kafka.version>
         <scylla.driver.version>3.11.5.3</scylla.driver.version>
@@ -291,6 +295,12 @@
                 </exclusion>
 
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-embedded</artifactId>
+            <version>3.0.0.Final</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

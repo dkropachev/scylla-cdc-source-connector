@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class ScyllaMasterTransport implements MasterTransport {
@@ -27,10 +29,13 @@ public class ScyllaMasterTransport implements MasterTransport {
     private final SourceConnectorContext context;
     private final ScyllaConnectorConfig connectorConfig;
     private volatile Map<TaskId, SortedSet<StreamId>> currentWorkerConfigurations;
+    private final Semaphore initializedLock = new Semaphore(1);
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     public ScyllaMasterTransport(SourceConnectorContext context, ScyllaConnectorConfig connectorConfig) {
         this.context = context;
         this.connectorConfig = connectorConfig;
+        this.initializedLock.acquireUninterruptibly();
     }
 
     @Override
@@ -65,9 +70,16 @@ public class ScyllaMasterTransport implements MasterTransport {
     public void configureWorkers(Map<TaskId, SortedSet<StreamId>> workerConfigurations) {
         this.currentWorkerConfigurations = workerConfigurations;
         context.requestTaskReconfiguration();
+        if (initialized.compareAndSet(false, true)) {
+            this.initializedLock.release();
+        }
     }
 
     public Map<TaskId, SortedSet<StreamId>> getWorkerConfigurations() {
+        if (!this.initialized.get()) {
+            this.initializedLock.acquireUninterruptibly();
+            this.initializedLock.release();
+        }
         return currentWorkerConfigurations;
     }
 }

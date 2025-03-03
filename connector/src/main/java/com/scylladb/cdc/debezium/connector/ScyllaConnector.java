@@ -14,12 +14,19 @@ import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigValue;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.source.SourceConnector;
+import org.apache.kafka.connect.source.SourceConnectorContext;
+import org.apache.kafka.connect.storage.OffsetStorageReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -61,7 +68,56 @@ public class ScyllaConnector extends SourceConnector {
     private Master buildMaster(ScyllaConnectorConfig connectorConfig) {
         this.masterSession = new ScyllaSessionBuilder(connectorConfig).build();
         Driver3MasterCQL cql = new Driver3MasterCQL(masterSession);
-        this.masterTransport = new ScyllaMasterTransport(context(), connectorConfig);
+        try {
+            this.masterTransport = new ScyllaMasterTransport(context(), connectorConfig);
+        } catch (Exception e) {
+            try {
+                Class<?> clazz = this.context.getClass();
+                Object ctx = this.context;
+
+                this.masterTransport = new ScyllaMasterTransport(new SourceConnectorContext() {
+                    final Method requestTaskReconfigurationMethod = clazz.getMethod("requestTaskReconfiguration");
+                    final Method raiseErrorMethod = clazz.getMethod("requestTaskReconfiguration", Exception.class);
+                    Object context = ctx;
+
+                    @Override
+                    public OffsetStorageReader offsetStorageReader() {
+                        return new OffsetStorageReader() {
+
+                            @Override
+                            public <T> Map<String, Object> offset(Map<String, T> map) {
+                                return new HashMap<>();
+                            }
+
+                            @Override
+                            public <T> Map<Map<String, T>, Map<String, Object>> offsets(Collection<Map<String, T>> collection) {
+                                return new HashMap<>();
+                            }
+                        };
+                    }
+
+                    @Override
+                    public void requestTaskReconfiguration() {
+                        try {
+                            requestTaskReconfigurationMethod.invoke(context);
+                        } catch (InvocationTargetException | IllegalAccessException ex) {
+                          throw new RuntimeException(ex);
+                        }
+                    }
+
+                    @Override
+                    public void raiseError(Exception e) {
+                        try {
+                        raiseErrorMethod.invoke(context, e);
+                        } catch (InvocationTargetException | IllegalAccessException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                }, connectorConfig);
+            } catch (NoSuchMethodException ex) {
+              throw new RuntimeException(ex);
+            }
+        }
         Set<TableName> tableNames = connectorConfig.getTableNames();
         MasterConfiguration masterConfiguration = MasterConfiguration.builder()
                 .withTransport(masterTransport)
